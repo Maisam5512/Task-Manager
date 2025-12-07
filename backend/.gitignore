@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# Logs
+npm-debug.log*
+
+# Next.js specific files (from your frontend, but good practice to include often)
+# If your backend generates a build folder:
+/build
+/dist
