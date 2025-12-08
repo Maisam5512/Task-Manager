@@ -134,7 +134,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "maisam12/frontend-app:latest"
+        IMAGE_NAME = "maisam12/frontend-app:latest"
     }
 
     stages {
@@ -147,7 +147,7 @@ pipeline {
 
         stage('Install Dependencies') {
             agent {
-                docker { image 'node:18' }
+                docker { image 'node:20' }
             }
             steps {
                 dir('frontend') {
@@ -158,7 +158,7 @@ pipeline {
 
         stage('Build Frontend') {
             agent {
-                docker { image 'node:18' }
+                docker { image 'node:20' }
             }
             steps {
                 dir('frontend') {
@@ -170,19 +170,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('frontend') {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
+                    sh "docker build -t ${IMAGE_NAME} ."
                 }
             }
         }
 
         stage('Run Container') {
             steps {
-                sh "docker rm -f frontend || true"
-                sh "docker run -d --name frontend -p 3000:3000 ${DOCKER_IMAGE}"
+                sh "docker rm -f frontend-app || true"
+                sh "docker run -d --name frontend-app -p 3000:3000 ${IMAGE_NAME}"
             }
         }
     }
 }
+
 
 
 
