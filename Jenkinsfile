@@ -73,6 +73,64 @@
 
 
 
+// pipeline {
+//     agent any
+
+//     stages {
+
+//         stage('Clone Repository') {
+//             steps {
+//                 git branch: 'main',
+//                 url: 'https://github.com/Maisam5512/Task-Manager'
+//             }
+//         }
+
+//         stage('Install Dependencies') {
+//             steps {
+//                 dir('frontend') {
+//                     sh 'npm ci'
+//                 }
+//             }
+//         }
+
+//         stage('Run Tests') {
+//             steps {
+//                 dir('frontend/tests') {
+//                     sh 'node sample.test.js'
+//                 }
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 dir('frontend') {
+//                     sh 'docker build -t maisam/taskapp-frontend:latest .'
+//                 }
+//             }
+//         }
+
+//         stage('Run Docker Container') {
+//             steps {
+//                 sh 'docker stop taskapp-frontend || true'
+//                 sh 'docker rm taskapp-frontend || true'
+//                 sh 'docker run -d --name taskapp-frontend -p 3000:3000 maisam/taskapp-frontend:latest'
+//             }
+//         }
+//     }
+
+//     post {
+//         success {
+//             echo 'Build completed successfully!'
+//         }
+//         failure {
+//             echo 'Build failed — check logs.'
+//         }
+//     }
+// }
+
+
+
+
 pipeline {
     agent any
 
@@ -80,23 +138,22 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main',
-                url: 'https://github.com/Maisam5512/Task-Manager'
+                git branch: 'main', credentialsId: 'github_pat', url: 'https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 dir('frontend') {
-                    sh 'npm ci'
+                    sh 'npm install'
                 }
             }
         }
 
         stage('Run Tests') {
             steps {
-                dir('frontend/tests') {
-                    sh 'node sample.test.js'
+                dir('frontend') {
+                    sh 'npm run build'
                 }
             }
         }
@@ -104,29 +161,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t maisam/taskapp-frontend:latest .'
+                    sh 'docker build -t YOUR_DOCKER_USERNAME/frontend-app:latest .'
                 }
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Run Container') {
             steps {
-                sh 'docker stop taskapp-frontend || true'
-                sh 'docker rm taskapp-frontend || true'
-                sh 'docker run -d --name taskapp-frontend -p 3000:3000 maisam/taskapp-frontend:latest'
+                sh 'docker rm -f frontend-container || true'
+                sh 'docker run -d --name frontend-container -p 3000:3000 YOUR_DOCKER_USERNAME/frontend-app:latest'
             }
         }
     }
-
-    post {
-        success {
-            echo 'Build completed successfully!'
-        }
-        failure {
-            echo 'Build failed — check logs.'
-        }
-    }
 }
+
 
 
 
