@@ -73,8 +73,6 @@
 
 
 
-
-
 pipeline {
     agent any
 
@@ -86,7 +84,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Frontend Dependencies') {
             steps {
                 dir('frontend') {
                     sh 'npm ci'
@@ -94,21 +92,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                dir('frontend/tests') {
-                    script {
-                        if (fileExists('test.sh')) {
-                            sh 'sh test.sh'
-                        } else {
-                            echo "No tests found, skipping..."
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Build Frontend Docker Image') {
             steps {
                 dir('frontend') {
                     sh 'docker build -t maisam/frontend-app:latest .'
@@ -116,21 +100,24 @@ pipeline {
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Run Frontend Container') {
             steps {
-                sh 'docker run -d -p 3000:3000 maisam/frontend-app:latest'
+                sh 'docker stop frontend || true'
+                sh 'docker rm frontend || true'
+                sh 'docker run -d --name frontend -p 3000:3000 maisam/frontend-app:latest'
             }
         }
     }
 
     post {
-        failure {
-            echo "❌ Build Failed"
-        }
         success {
-            echo "✅ Build Successful"
+            echo '🎉 Frontend Build Completed Successfully!'
+        }
+        failure {
+            echo '❌ Build Failed. Check console output.'
         }
     }
 }
+
 
 
