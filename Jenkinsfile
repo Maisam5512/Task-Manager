@@ -138,7 +138,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', credentialsId: 'github_pat', url: 'https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git'
+                git branch: 'main', credentialsId: 'github-https-creds', url: 'https://github.com/Maisam5512/Task-Manager'
             }
         }
 
@@ -161,7 +161,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t YOUR_DOCKER_USERNAME/frontend-app:latest .'
+                    sh 'docker build -t maisam12/frontend-app:latest .'
                 }
             }
         }
@@ -169,7 +169,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh 'docker rm -f frontend-container || true'
-                sh 'docker run -d --name frontend-container -p 3000:3000 YOUR_DOCKER_USERNAME/frontend-app:latest'
+                sh 'docker run -d --name frontend-container -p 3000:3000 maisam12/frontend-app:latest'
             }
         }
     }
