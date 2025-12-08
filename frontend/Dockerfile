@@ -1,22 +1,19 @@
-# --- BUILD STAGE ---
+# Build Stage
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy project files and build
 COPY . .
 RUN npm run build
 
-# --- PRODUCTION STAGE ---
+# Production Stage
 FROM node:20-alpine
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy build files
 COPY --from=builder /app ./
 
 EXPOSE 3000

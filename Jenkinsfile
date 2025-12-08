@@ -80,11 +80,12 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/Maisam5512/Task-Manager'
+                git branch: 'main',
+                url: 'https://github.com/Maisam5512/Task-Manager'
             }
         }
 
-        stage('Install Frontend Dependencies') {
+        stage('Install Dependencies') {
             steps {
                 dir('frontend') {
                     sh 'npm ci'
@@ -92,32 +93,41 @@ pipeline {
             }
         }
 
-        stage('Build Frontend Docker Image') {
+        stage('Run Tests') {
             steps {
-                dir('frontend') {
-                    sh 'docker build -t maisam/frontend-app:latest .'
+                dir('frontend/tests') {
+                    sh 'node sample.test.js'
                 }
             }
         }
 
-        stage('Run Frontend Container') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker stop frontend || true'
-                sh 'docker rm frontend || true'
-                sh 'docker run -d --name frontend -p 3000:3000 maisam/frontend-app:latest'
+                dir('frontend') {
+                    sh 'docker build -t maisam/taskapp-frontend:latest .'
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh 'docker stop taskapp-frontend || true'
+                sh 'docker rm taskapp-frontend || true'
+                sh 'docker run -d --name taskapp-frontend -p 3000:3000 maisam/taskapp-frontend:latest'
             }
         }
     }
 
     post {
         success {
-            echo '🎉 Frontend Build Completed Successfully!'
+            echo 'Build completed successfully!'
         }
         failure {
-            echo '❌ Build Failed. Check console output.'
+            echo 'Build failed — check logs.'
         }
     }
 }
+
 
 
 
