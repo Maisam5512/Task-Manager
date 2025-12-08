@@ -150,10 +150,10 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'npm run build'
+                    sh 'npm run build --if-present'
                 }
             }
         }
@@ -166,14 +166,17 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+        stage('Run Docker Container') {
             steps {
-                sh 'docker rm -f frontend-container || true'
-                sh 'docker run -d --name frontend-container -p 3000:3000 maisam12/frontend-app:latest'
+                script {
+                    sh 'docker rm -f frontend-container || true'
+                    sh 'docker run -d --name frontend-container -p 3000:3000 maisam12/frontend-app:latest'
+                }
             }
         }
     }
 }
+
 
 
 
