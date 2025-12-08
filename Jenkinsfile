@@ -130,19 +130,25 @@
 
 
 
-
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "maisam12/frontend-app:latest"
+    }
+
     stages {
 
-        stage('Clone Repository') {
+        stage('Clone Repo') {
             steps {
                 git branch: 'main', credentialsId: 'github-https-creds', url: 'https://github.com/Maisam5512/Task-Manager'
             }
         }
 
         stage('Install Dependencies') {
+            agent {
+                docker { image 'node:18' }
+            }
             steps {
                 dir('frontend') {
                     sh 'npm install'
@@ -151,9 +157,12 @@ pipeline {
         }
 
         stage('Build Frontend') {
+            agent {
+                docker { image 'node:18' }
+            }
             steps {
                 dir('frontend') {
-                    sh 'npm run build --if-present'
+                    sh 'npm run build'
                 }
             }
         }
@@ -161,21 +170,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t maisam12/frontend-app:latest .'
+                    sh "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Run Container') {
             steps {
-                script {
-                    sh 'docker rm -f frontend-container || true'
-                    sh 'docker run -d --name frontend-container -p 3000:3000 maisam12/frontend-app:latest'
-                }
+                sh "docker rm -f frontend || true"
+                sh "docker run -d --name frontend -p 3000:3000 ${DOCKER_IMAGE}"
             }
         }
     }
 }
+
 
 
 
