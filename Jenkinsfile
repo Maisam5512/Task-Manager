@@ -75,8 +75,6 @@
 
 
 
-
-
 pipeline {
     agent any
 
@@ -84,96 +82,55 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Maisam5512/Task-Manager.git'
+                git branch: 'main', url: 'https://github.com/Maisam5512/Task-Manager'
             }
         }
 
-        stage('Install Backend Dependencies') {
-            steps {
-                dir('backend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Install Frontend Dependencies') {
+        stage('Install Dependencies') {
             steps {
                 dir('frontend') {
-                    sh 'npm install'
+                    sh 'npm ci'
                 }
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo "Running Backend Tests..."
-                dir('backend/tests') {
-                    sh 'echo "Backend tests passed"'
-                }
-                echo "Running Frontend Tests..."
                 dir('frontend/tests') {
-                    sh 'echo "Frontend tests passed"'
+                    script {
+                        if (fileExists('test.sh')) {
+                            sh 'sh test.sh'
+                        } else {
+                            echo "No tests found, skipping..."
+                        }
+                    }
                 }
             }
         }
 
-        stage('Build Backend Image') {
-            steps {
-                dir('backend') {
-                    sh 'docker build -t maisam/taskapp-backend:latest .'
-                }
-            }
-        }
-
-        stage('Build Frontend Image') {
+        stage('Build Docker Image') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t maisam/taskapp-frontend:latest .'
+                    sh 'docker build -t maisam/frontend-app:latest .'
                 }
             }
         }
 
-        stage('Build Final Deployment Image') {
+        stage('Run Docker Container') {
             steps {
-                sh '''
-                    mkdir -p final-app
-
-                    # Copy backend build output
-                    cp -r backend/* final-app/
-
-                    # Copy frontend build output
-                    cp -r frontend/.next final-app/frontend-build
-                    cp -r frontend/public final-app/public
-
-                    # Create final multi-service image Dockerfile
-                    cat <<EOF > final-app/Dockerfile
-                    FROM node:20-alpine
-                    WORKDIR /app
-
-                    # Copy backend app
-                    COPY . /app
-
-                    EXPOSE 5000
-
-                    CMD ["node", "server.js"]
-                    EOF
-
-                    cd final-app
-                    docker build -t maisam/taskapp:latest .
-                '''
-            }
-        }
-
-        stage('Run Final Container') {
-            steps {
-                sh '''
-                    docker stop taskapp || true
-                    docker rm taskapp || true
-                    docker run -d -p 5000:5000 --name taskapp maisam/taskapp:latest
-                '''
+                sh 'docker run -d -p 3000:3000 maisam/frontend-app:latest'
             }
         }
     }
+
+    post {
+        failure {
+            echo "❌ Build Failed"
+        }
+        success {
+            echo "✅ Build Successful"
+        }
+    }
 }
+
 
