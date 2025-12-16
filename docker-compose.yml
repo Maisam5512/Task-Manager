@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: taskapp-mongo
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - taskapp_network
+
+  backend:
+    image: taskapp-backend
+    container_name: backend_api
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - mongo
+    networks:
+      - taskapp_network
+
+  frontend:
+    image: taskapp-frontend
+    container_name: frontend_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - taskapp_network
+
+volumes:
+  mongo_data:
+
+networks:
+  taskapp_network:
+    driver: bridge

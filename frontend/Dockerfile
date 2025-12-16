@@ -1,14 +1,23 @@
-# Step 1: Build
-FROM node:20 AS builder
+# Step 1: Base image
+FROM node:20-alpine
+
+# Step 2: Set working directory
 WORKDIR /app
+
+# Step 3: Copy package files
 COPY package*.json ./
+
+# Step 4: Install dependencies
 RUN npm install
+
+# Step 5: Copy frontend code
 COPY . .
+
+# Step 6: Build Next.js app
 RUN npm run build
 
-# Step 2: Run
-FROM node:20
-WORKDIR /app
-COPY --from=builder /app .
+# Step 7: Expose frontend port
 EXPOSE 3000
+
+# Step 8: Start Next.js
 CMD ["npm", "start"]
