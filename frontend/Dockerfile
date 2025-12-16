@@ -1,7 +1,7 @@
 # Step 1: Base image
 FROM node:20-alpine
 
-# Step 2: Set working directory
+# Step 2: Set working 
 WORKDIR /app
 
 # Step 3: Copy package files

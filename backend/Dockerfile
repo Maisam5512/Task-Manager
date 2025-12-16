@@ -10,7 +10,7 @@ COPY package*.json ./
 # Step 4: Install dependencies
 RUN npm install
 
-# Step 5: Copy rest of the backend code
+# Step 5: Copy rest of the backend 
 COPY . .
 
 # Step 6: Expose backend port
